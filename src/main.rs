@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use dioxus::logger::tracing::{info, Level};
 use dioxus::prelude::{rsx, *};
 use libchessticot::{
-    BetterEvaluationPlayer, ChessMove, Coords, FirstMovePlayer, Piece, PieceColor, PieceKind,
-    Player, Position,
+    BetterEvaluationPlayer, ChessMove, Coords, Piece, PieceColor, PieceKind, Player, Position,
 };
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -20,12 +19,19 @@ fn App() -> Element {
     let position = use_signal(|| Position::initial());
     let selected_square = use_signal(|| None);
     let highlighted_moves = use_signal(|| HashMap::new());
-    let engine = use_signal(|| FirstMovePlayer {});
+    let engine = use_signal(|| BetterEvaluationPlayer {});
+    let promote_to = use_signal(|| {
+        PieceKind::promoteable()
+            .next()
+            .expect("there are promoteable piece kinds")
+            .clone()
+    });
     let mut y = -1;
     let mut x = -1;
     rsx! {
     document::Link { rel: "icon", href: FAVICON }
     document::Link { rel: "stylesheet", href: MAIN_CSS }
+    PromotionSelector{ promote_to }
     {if position.read().is_checkmate() { rsx!{ div { "Checkmate !" } }} else if position.read().is_stalemate() { rsx!{ div { "Stalemate." }}} else { rsx!{ div { "{piece_color_string(&position.read().to_move)} to move" }} }}
     div {
             {
@@ -34,7 +40,7 @@ fn App() -> Element {
                         y+=1; x=-1; rsx!{
                             div {
                                 class:"rank",
-                                { rank.iter().map(|contents| {x+=1; let coordinates = Coords{x,y}; rsx!{ Square { square_contents: *contents, coordinates, selected_square, highlighted_moves, position, engine}}} ) }
+                                { rank.iter().map(|contents| {x+=1; let coordinates = Coords{x,y}; rsx!{ Square { square_contents: *contents, coordinates, selected_square, highlighted_moves, position, engine, promote_to}}} ) }
                             }
                         }
                     }
@@ -51,7 +57,8 @@ fn Square(
     selected_square: Signal<Option<Coords>>,
     highlighted_moves: Signal<HashMap<Coords, ChessMove>>,
     position: Signal<Position>,
-    engine: Signal<FirstMovePlayer>,
+    engine: Signal<BetterEvaluationPlayer>,
+    promote_to: Signal<PieceKind>,
 ) -> Element {
     let text = match square_contents {
         None => "".to_string(),
@@ -93,7 +100,10 @@ fn Square(
                 );
                 } else {
                 if let Some(move_to_make) = highlighted_moves.read().get(&coordinates) {
-                    let after_player_move = position.read().after_move(move_to_make);
+                    let after_player_move = match move_to_make {
+                        ChessMove::Promotion(movement, _) => position.read().after_move(&ChessMove::Promotion(movement.clone(), promote_to.read().clone())),
+                        _ => position.read().after_move(move_to_make),
+                    };
                     if after_player_move.is_checkmate() || after_player_move.is_stalemate() {
                         position.set(after_player_move);
                     } else {
@@ -108,6 +118,27 @@ fn Square(
 
         } , "{text}"  }
 
+    }
+}
+
+#[component]
+fn PromotionSelector(promote_to: Signal<PieceKind>) -> Element {
+    let update_promote_to = move |evt: FormEvent| {
+        promote_to.set(kind_from_display_name(&evt.value()));
+    };
+    rsx! {
+        "Promoting to "
+        select {
+                name:"promote_to", id:"promote_to",
+                onchange: update_promote_to,
+                for kind in PieceKind::promoteable() {
+                    {
+                        rsx!{
+                            option { "{piece_display_name(kind)}" }
+                        }
+                    }
+                }
+        }
     }
 }
 
@@ -131,6 +162,18 @@ fn piece_display_name(kind: &PieceKind) -> String {
         PieceKind::Bishop => "Bishob".to_string(),
         PieceKind::Queen => "Queen".to_string(),
         PieceKind::King => "King".to_string(),
+    }
+}
+
+fn kind_from_display_name(display_name: &str) -> PieceKind {
+    match display_name {
+        "Pawn" => PieceKind::Pawn,
+        "Rook" => PieceKind::Rook,
+        "Knight" => PieceKind::Knight,
+        "Bishob" => PieceKind::Bishop,
+        "Queen" => PieceKind::Queen,
+        "King" => PieceKind::King,
+        _ => panic!("Tried to get nonexistent piece kind"),
     }
 }
 
