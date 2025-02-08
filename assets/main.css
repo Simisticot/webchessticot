@@ -6,41 +6,31 @@ body {
     margin: 20px;
 }
 
-#hero {
-    margin: 0;
+.rank{
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+}
+
+.square{
+    width: 70px;
+    height: 70px;
+    border: solid 1px white;
     align-items: center;
-}
-
-#links {
-    width: 400px;
-    text-align: left;
-    font-size: x-large;
-    color: white;
+    justify-content: center;
     display: flex;
-    flex-direction: column;
 }
 
-#links a {
+.white{
     color: white;
-    text-decoration: none;
-    margin-top: 20px;
-    margin: 10px 0px;
-    border: white 1px solid;
-    border-radius: 5px;
-    padding: 10px;
 }
 
-#links a:hover {
-    background-color: #1f1f1f;
-    cursor: pointer;
+.black{
+    color: chocolate;
 }
 
-#header {
-    max-width: 1200px;
+.selected{
+    background-color: DarkSlateBlue;
 }
 
-
-
+.highlighted{
+    background-color: BurlyWood;
+}
