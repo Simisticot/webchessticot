@@ -6,7 +6,7 @@ use libchessticot::{
     BetterEvaluationPlayer, ChessMove, Coords, Piece, PieceColor, PieceKind, Player, Position,
 };
 
-const FAVICON: Asset = asset!("/assets/favicon.ico");
+const FAVICON: Asset = asset!("/assets/chessticot.png");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
 fn main() {
