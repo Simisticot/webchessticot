@@ -8,6 +8,18 @@ use libchessticot::{
 
 const FAVICON: Asset = asset!("/assets/chessticot.png");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
+const WHITE_PAWN: Asset = asset!("/assets/pieces/white_pawn.png");
+const WHITE_ROOK: Asset = asset!("/assets/pieces/white_rook.png");
+const WHITE_KNIGHT: Asset = asset!("/assets/pieces/white_knight.png");
+const WHITE_BISHOP: Asset = asset!("/assets/pieces/white_bishop.png");
+const WHITE_QUEEN: Asset = asset!("/assets/pieces/white_queen.png");
+const WHITE_KING: Asset = asset!("/assets/pieces/white_king.png");
+const BLACK_PAWN: Asset = asset!("/assets/pieces/black_pawn.png");
+const BLACK_ROOK: Asset = asset!("/assets/pieces/black_rook.png");
+const BLACK_KNIGHT: Asset = asset!("/assets/pieces/black_knight.png");
+const BLACK_BISHOP: Asset = asset!("/assets/pieces/black_bishop.png");
+const BLACK_QUEEN: Asset = asset!("/assets/pieces/black_queen.png");
+const BLACK_KING: Asset = asset!("/assets/pieces/black_king.png");
 
 fn main() {
     dioxus::logger::init(Level::INFO).expect("logger should initialize");
@@ -60,9 +72,9 @@ fn Square(
     engine: Signal<BetterEvaluationPlayer>,
     promote_to: Signal<PieceKind>,
 ) -> Element {
-    let text = match square_contents {
-        None => "".to_string(),
-        Some(piece) => piece_display_name(&piece.kind),
+    let piece_image = match square_contents {
+        None => rsx! {},
+        Some(piece) => rsx! {img{ src:image_path_from_piece(&piece)}},
     };
     let color = match square_contents {
         None => "white".to_string(),
@@ -86,9 +98,14 @@ fn Square(
     } else {
         "not_highlighted".to_string()
     };
+    let square_color_class = if (coordinates.x + coordinates.y) % 2 == 0 {
+        "black_square"
+    } else {
+        "white_square"
+    };
 
     rsx! {
-        div { class:"square {color} {selected_class} {highlighted_class}", onclick: move |_| {
+        div { class:"square {color} {selected_class} {highlighted_class} {square_color_class}", onclick: move |_| {
                 if selected_square.read().is_none(){
                     selected_square.set(Some(coordinates));
                     position.read().legal_moves_from_origin(&coordinates)
@@ -116,7 +133,7 @@ fn Square(
             }
 
 
-        } , "{text}"  }
+        } , {piece_image}  }
 
     }
 }
@@ -162,6 +179,35 @@ fn piece_display_name(kind: &PieceKind) -> String {
         PieceKind::Bishop => "Bishob".to_string(),
         PieceKind::Queen => "Queen".to_string(),
         PieceKind::King => "King".to_string(),
+    }
+}
+
+fn image_path_from_piece(piece: &Piece) -> Asset {
+    match piece.kind {
+        PieceKind::Pawn => match piece.color {
+            PieceColor::White => WHITE_PAWN,
+            PieceColor::Black => BLACK_PAWN,
+        },
+        PieceKind::Knight => match piece.color {
+            PieceColor::White => WHITE_KNIGHT,
+            PieceColor::Black => BLACK_KNIGHT,
+        },
+        PieceKind::Rook => match piece.color {
+            PieceColor::White => WHITE_ROOK,
+            PieceColor::Black => BLACK_ROOK,
+        },
+        PieceKind::Bishop => match piece.color {
+            PieceColor::White => WHITE_BISHOP,
+            PieceColor::Black => BLACK_BISHOP,
+        },
+        PieceKind::Queen => match piece.color {
+            PieceColor::White => WHITE_QUEEN,
+            PieceColor::Black => BLACK_QUEEN,
+        },
+        PieceKind::King => match piece.color {
+            PieceColor::White => WHITE_KING,
+            PieceColor::Black => BLACK_KING,
+        },
     }
 }
 

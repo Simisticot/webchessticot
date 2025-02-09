@@ -13,7 +13,6 @@ body {
 .square{
     width: 70px;
     height: 70px;
-    border: solid 1px white;
     align-items: center;
     justify-content: center;
     display: flex;
@@ -27,10 +26,20 @@ body {
     color: chocolate;
 }
 
-.selected{
-    background-color: DarkSlateBlue;
+.square.selected{
+    border: ridge 5px blue;
+    box-sizing: border-box;
 }
 
-.highlighted{
-    background-color: BurlyWood;
+.square.highlighted {
+    border: ridge 5px green;
+    box-sizing: border-box;
+}
+
+.black_square{
+    background-color: #b58863;
+}
+
+.white_square{
+    background-color: #f0d9b5;
 }
