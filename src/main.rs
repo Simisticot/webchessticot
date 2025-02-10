@@ -99,9 +99,9 @@ fn Square(
         "not_highlighted".to_string()
     };
     let square_color_class = if (coordinates.x + coordinates.y) % 2 == 0 {
-        "black_square"
-    } else {
         "white_square"
+    } else {
+        "black_square"
     };
 
     rsx! {
