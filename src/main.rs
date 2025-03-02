@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use dioxus::logger::tracing::{info, Level};
+use dioxus::logger::tracing::Level;
 use dioxus::prelude::{rsx, *};
 use libchessticot::{
-    BetterEvaluationPlayer, ChessMove, Coords, Piece, PieceColor, PieceKind, Player, Position,
+    ChessMove, Coords, Piece, PieceColor, PieceKind, Planner, Player, Position
 };
 
 const FAVICON: Asset = asset!("/assets/chessticot.png");
@@ -31,7 +31,7 @@ fn App() -> Element {
     let position = use_signal(|| Position::initial());
     let selected_square = use_signal(|| None);
     let highlighted_moves = use_signal(|| HashMap::new());
-    let engine = use_signal(|| BetterEvaluationPlayer {});
+    let engine = use_signal(|| Planner {});
     let promote_to = use_signal(|| {
         PieceKind::promoteable()
             .next()
@@ -69,7 +69,7 @@ fn Square(
     selected_square: Signal<Option<Coords>>,
     highlighted_moves: Signal<HashMap<Coords, ChessMove>>,
     position: Signal<Position>,
-    engine: Signal<BetterEvaluationPlayer>,
+    engine: Signal<Planner>,
     promote_to: Signal<PieceKind>,
 ) -> Element {
     let piece_image = match square_contents {
@@ -111,7 +111,6 @@ fn Square(
                     position.read().legal_moves_from_origin(&coordinates)
                     .iter().for_each(|chess_move|
                     {
-                        info!("Adding a highlighted move");
                         highlighted_moves.write().insert(move_to_highlighted_square(chess_move, &position.read().to_move), chess_move.clone());
                     }
                 );
